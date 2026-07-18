@@ -2,24 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Material Desk Clock</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Desk & Mobile Clock</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
     
     <style>
         :root {
-            --bg-color: #000000;
+            --bg-color: #0d0d11;
             --text-main: #ffffff;
-            --panel-bg: rgba(25, 25, 25, 0.9);
+            --panel-bg: rgba(20, 20, 25, 0.95);
             --panel-text: #ffffff;
             --panel-border: rgba(255, 255, 255, 0.1);
             
             --color-dark: #1062c3;
             --color-light: #5faaff;
             --color-dots: rgba(180, 205, 230, 0.75);
-            --bar-bg: rgba(255, 255, 255, 0.04);
+            --modal-bg: rgba(15, 15, 20, 0.98);
         }
 
         body.light-mode {
@@ -28,13 +28,14 @@
             --panel-bg: rgba(255, 255, 255, 0.95);
             --panel-text: #1d1d1f;
             --panel-border: rgba(0, 0, 0, 0.1);
-            --bar-bg: rgba(0, 0, 0, 0.03);
+            --modal-bg: rgba(255, 255, 255, 0.98);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -48,12 +49,13 @@
             transition: background-color 0.3s ease;
         }
 
-        /* --- SIDEBAR PANEL WITH TOGGLE --- */
+        /* --- SIDEBAR PANEL (WITH SCROLL FIX) --- */
         .sidebar {
-            width: 300px;
+            width: 280px;
             height: 100vh;
             background: var(--panel-bg);
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-right: 1px solid var(--panel-border);
             padding: 70px 20px 30px 20px;
             display: flex;
@@ -62,23 +64,24 @@
             position: fixed;
             left: 0;
             top: 0;
-            z-index: 10;
+            z-index: 100;
             color: var(--panel-text);
             font-family: 'Plus Jakarta Sans', sans-serif;
-            transform: translateX(0);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .sidebar.closed {
             transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto; /* Fix scrolling issue inside options navigation panel */
+            scrollbar-width: thin;
         }
 
-        /* Menu Button */
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
         .menu-toggle {
             position: fixed;
             left: 15px;
             top: 15px;
-            z-index: 11;
+            z-index: 110;
             background: rgba(128, 128, 128, 0.2);
             border: 1px solid var(--panel-border);
             color: var(--text-main);
@@ -91,10 +94,6 @@
             align-items: center;
             justify-content: center;
             backdrop-filter: blur(5px);
-            transition: background 0.2s, left 0.3s;
-        }
-        .menu-toggle:hover {
-            background: rgba(128, 128, 128, 0.4);
         }
 
         .sidebar h2 {
@@ -118,7 +117,7 @@
             opacity: 0.8;
         }
 
-        .btn-toggle, .btn-mode {
+        .btn-toggle, .btn-mode, .btn-action {
             background: rgba(128, 128, 128, 0.15);
             border: 1px solid var(--panel-border);
             color: inherit;
@@ -127,12 +126,18 @@
             cursor: pointer;
             font-weight: 600;
             font-size: 0.9rem;
+            text-align: center;
         }
 
         .btn-mode.active {
             background: var(--color-light);
             color: #000;
             border-color: transparent;
+        }
+
+        .btn-action {
+            background: var(--panel-border);
+            border: 1px solid var(--color-light);
         }
 
         .color-presets {
@@ -195,7 +200,23 @@
         .btn-start { background-color: #2ecc71; }
         .btn-reset { background-color: #e74c3c; }
 
-        /* --- MAIN VIEWPORT LAYER --- */
+        /* --- CALENDAR CLOCK ELEMENT (TOP RIGHT CORNER) --- */
+        .calendar-corner-tag {
+            position: fixed;
+            top: 25px;
+            right: 30px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            font-size: clamp(1rem, 2vw, 1.35rem);
+            letter-spacing: 0.02em;
+            color: var(--text-main);
+            opacity: 0.85;
+            z-index: 50;
+            text-align: right;
+            text-transform: uppercase;
+        }
+
+        /* --- MAIN VIEWPORT DISPLAY AREA --- */
         .main-display {
             flex: 1;
             width: 100vw;
@@ -203,21 +224,17 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
-            padding-left: 0;
-            transition: padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 20px;
         }
         
-        body:not(.sidebar-closed-state) .main-display {
-            padding-left: 300px;
-        }
-
         .view-wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 3.5vh;
+            gap: 4.5vh;
+            width: 100%;
+            max-width: 1400px;
         }
 
         .view-container {
@@ -231,16 +248,27 @@
             display: none !important;
         }
 
-        /* --- FIXED CLEAN DIGITAL GRID --- */
+        /* --- DYNAMIC IMMERSIVE DRIFT ANIMATION TRACKS --- */
+        @keyframes immersiveDrift {
+            0% { transform: translateY(0px) translateX(0px); }
+            25% { transform: translateY(-4px) translateX(2px); }
+            50% { transform: translateY(-1px) translateX(-3px); }
+            75% { transform: translateY(-5px) translateX(-1px); }
+            100% { transform: translateY(0px) translateX(0px); }
+        }
+
         .display-group {
             display: flex;
             align-items: center;
+            justify-content: center;
+            animation: immersiveDrift 9s ease-in-out infinite; /* Immersive floating animation loop */
         }
 
+        /* Bigger font scaling array rulesets */
         .digit-pair {
             display: flex;
             align-items: center;
-            font-size: 19vw; 
+            font-size: clamp(5.2rem, 13vw, 15.5rem); 
             font-weight: 700;
             line-height: 0.8;
         }
@@ -253,7 +281,7 @@
 
         .d2 {
             color: var(--color-light);
-            margin-left: -0.15em; 
+            margin-left: -0.15em;
             position: relative;
             z-index: 2;
         }
@@ -262,98 +290,202 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            gap: 4vw;
+            gap: 2.5vw;
             margin: 0 1vw 0 -0.05em;
             z-index: 3;
         }
 
         .colon-dot {
-            width: 2.8vw;
-            height: 2.8vw;
+            width: clamp(0.6rem, 1.7vw, 2.1rem);
+            height: clamp(0.6rem, 1.7vw, 2.1rem);
             background-color: var(--color-dots);
             border-radius: 50%;
         }
 
         .ms-display {
-            font-size: 8vw;
+            font-size: clamp(3rem, 7vw, 7.5rem);
             color: var(--color-light);
             align-self: flex-end;
-            margin-bottom: 0.5vw;
-            margin-left: 2vw;
+            margin-bottom: 0.2vw;
+            margin-left: 1.5vw;
             opacity: 0.8;
             font-weight: 600;
         }
 
-        /* --- COOL WORK TASKS BAR --- */
-        .task-bar {
-            width: 100%;
-            max-width: 58vw;
-            background: var(--bar-bg);
-            border-left: 5px solid var(--color-light);
-            border-top: 1px solid var(--panel-border);
-            border-right: 1px solid var(--panel-border);
-            border-bottom: 1px solid var(--panel-border);
-            padding: 18px 25px;
-            border-radius: 16px;
-            backdrop-filter: blur(10px);
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            transition: border-color 0.3s ease;
+        /* --- HELVETICA TASK COMPONENT (THEME COLOR LAYER MATCHING) --- */
+        .task-plain-text {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-weight: 700;
+            font-size: clamp(1.15rem, 3.4vw, 1.75rem);
+            color: var(--color-light); /* Matching the timer theme selection accents natively */
+            text-align: center;
+            letter-spacing: -0.02em;
+            line-height: 1.4;
+            max-width: 80vw;
+            opacity: 0.95;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.25);
+            transition: color 0.3s ease;
         }
 
-        .task-header {
+        /* --- FULL SCREEN TIMETABLE MODAL DISPLAY PANEL --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: var(--modal-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            z-index: 200;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px 20px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            width: 100%;
+            max-width: 750px;
+            max-height: 85vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            padding-right: 10px;
+        }
+
+        .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.85rem;
-            font-weight: 700;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-            color: var(--color-light);
+            border-bottom: 2px solid var(--panel-border);
+            padding-bottom: 15px;
         }
 
-        .task-title {
-            font-size: 1.4rem;
+        .modal-header h3 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.8rem;
+        }
+
+        .close-modal-btn {
+            background: rgba(128,128,128,0.2);
+            border: 1px solid var(--panel-border);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
             font-weight: 600;
-            color: var(--text-main);
-            letter-spacing: -0.01em;
-            line-height: 1.3;
         }
 
-        /* Message Slot Checklist Sub-Grid */
-        .task-checklist {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 6px;
-            margin-top: 6px;
-            padding-top: 10px;
-            border-top: 1px solid var(--panel-border);
-        }
-
-        .check-item {
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-main);
-            opacity: 0.7;
-        }
-        
-        .check-item::before {
-            content: "✓";
+        .schedule-section h4, .targets-section h4 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.25rem;
             color: var(--color-light);
-            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .schedule-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .schedule-row {
+            display: flex;
+            padding: 12px 16px;
+            background: rgba(128,128,128,0.08);
+            border-radius: 10px;
+            border-left: 4px solid var(--panel-border);
+            font-size: 0.95rem;
+        }
+
+        .schedule-row.active-row {
+            border-left-color: var(--color-light);
+            background: rgba(var(--color-light-rgb, 95, 170, 255), 0.12);
+        }
+
+        .row-time {
+            width: 180px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .row-task {
+            flex: 1;
+            line-height: 1.4;
+        }
+
+        .targets-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        @media(min-width: 550px) {
+            .targets-list { grid-template-columns: 1fr 1fr; }
+        }
+
+        .target-card {
+            background: rgba(128,128,128,0.08);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--panel-border);
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        /* Responsive UI Breakpoints */
+        @media (max-width: 767px) {
+            .display-group {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .colon-container {
+                display: none;
+            }
+
+            .digit-pair {
+                font-size: clamp(5.8rem, 17vw, 11rem);
+            }
+
+            .d2 {
+                margin-left: -0.12em;
+            }
+
+            .row-time {
+                width: 110px;
+                font-size: 0.85rem;
+            }
+            .row-task { font-size: 0.85rem; }
+            
+            .calendar-corner-tag {
+                top: 20px;
+                right: 20px;
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
 <body>
 
-    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+    <!-- Navigation Burger Trigger -->
+    <button class="menu-toggle" id="toggleMenuBtn" onclick="toggleSidebar(event)">☰</button>
 
-    <!-- SIDEBAR SETTINGS -->
+    <!-- CALENDAR METADATA CLUSTER MODULE -->
+    <div class="calendar-corner-tag" id="live-calendar-cluster">Loading Date...</div>
+
+    <!-- OPTIONS PANEL -->
     <div class="sidebar" id="sidebarMenu">
         <h2>Options Panel</h2>
         
@@ -361,6 +493,11 @@
             <span class="setting-label">Display Mode</span>
             <button class="btn-mode active" id="mode-clock" onclick="switchView('clock')">Clock</button>
             <button class="btn-mode" id="mode-sw" onclick="switchView('stopwatch')">Stopwatch</button>
+        </div>
+
+        <div class="setting-group">
+            <span class="setting-label">Timetable & Goals</span>
+            <button class="btn-action" onclick="toggleModal(true)">View Schedule Details</button>
         </div>
 
         <div class="setting-group">
@@ -396,11 +533,11 @@
         </div>
     </div>
 
-    <!-- MAIN INTERACTIVE WRAPPER -->
-    <div class="main-display">
+    <!-- MAIN DISPLAY ENGINE -->
+    <div class="main-display" onclick="closeSidebarOutside(event)">
         <div class="view-wrapper">
             
-            <!-- Live Clock -->
+            <!-- Live Clock Grid View -->
             <div class="view-container" id="clock-interface">
                 <div class="display-group">
                     <div class="digit-pair">
@@ -415,10 +552,18 @@
                         <span class="d1" id="m1">0</span>
                         <span class="d2" id="m2">0</span>
                     </div>
+                    <div class="colon-container">
+                        <div class="colon-dot"></div>
+                        <div class="colon-dot"></div>
+                    </div>
+                    <div class="digit-pair">
+                        <span class="d1" id="s1">0</span>
+                        <span class="d2" id="s2">0</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Stopwatch -->
+            <!-- Stopwatch Grid View -->
             <div class="view-container hidden" id="stopwatch-interface">
                 <div class="display-group">
                     <div class="digit-pair">
@@ -437,93 +582,75 @@
                 </div>
             </div>
 
-            <!-- DYNAMIC TASK BAR -->
-            <div class="task-bar" id="schedule-bar">
-                <div class="task-header">
-                    <span id="task-status">Current Task</span>
-                    <span id="task-time">00:00 - 00:00</span>
-                </div>
-                <div class="task-title" id="task-title">Loading Timetable...</div>
-                <div class="task-checklist hidden" id="slot-checklist">
-                    <div class="check-item">10 new cold messages</div>
-                    <div class="check-item">Reply to responses</div>
-                    <div class="check-item">Update CRM status</div>
-                    <div class="check-item">Queue follow-ups</div>
-                </div>
-            </div>
+            <!-- DYNAMIC HELVETICA TRACK VIEW -->
+            <div class="task-plain-text" id="plain-task-text">Loading Schedule Metrics...</div>
 
         </div>
     </div>
 
+    <!-- TIMETABLE FULLSCREEN MODAL OVERLAY -->
+    <div class="modal-overlay" id="timetableModal" onclick="toggleModal(false)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3>Schedule Dashboard</h3>
+                <button class="close-modal-btn" onclick="toggleModal(false)">Close</button>
+            </div>
+            
+            <div class="targets-section">
+                <h4>Daily Targets</h4>
+                <div class="targets-list">
+                    <div class="target-card"><strong>Cold Messages:</strong> 50 Messages total via 5 dedicated 12-minute blocks.</div>
+                    <div class="target-card"><strong>Call Goals:</strong> 50 Outbound Connections split across sessions.</div>
+                    <div class="target-card"><strong>Content Operations:</strong> 15 Blog Updates uploaded and indexed.</div>
+                    <div class="target-card"><strong>CRM Systems:</strong> Continuous logs updated instantly post-session blocks.</div>
+                </div>
+            </div>
+
+            <div class="schedule-section">
+                <h4>Operational Timetable</h4>
+                <div class="schedule-grid" id="modal-schedule-grid">
+                    <!-- Dynamic rows scale here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // --- Hardcoded Timetable Data Matrix ---
         const timetable = [
             { start: "09:00", end: "09:15", name: "Set agenda & prepare CRM", isSlot: false },
-            { start: "09:15", end: "09:27", name: "Message Slot 1: 10 cold messages + reply to responses + CRM updates", isSlot: true },
-            { start: "09:27", end: "11:42", name: "Call Session 1 (25 calls)", isSlot: false },
-            { start: "11:42", end: "11:54", name: "Message Slot 2: 10 cold messages + replies + CRM updates", isSlot: true },
+            { start: "09:15", end: "09:27", name: "Message Slot 1: 10 cold messages plus reply to responses plus CRM updates", isSlot: true },
+            { start: "09:27", end: "11:42", name: "Call Session 1", isSlot: false },
+            { start: "11:42", end: "11:54", name: "Message Slot 2: 10 cold messages plus replies plus CRM updates", isSlot: true },
             { start: "11:54", end: "13:00", name: "Continue Call Session 1 / Overflow", isSlot: false },
-            { start: "13:00", end: "14:00", name: "Lunch Break ☕", isSlot: false },
-            { start: "14:00", end: "14:12", name: "Message Slot 3: 10 cold messages + replies + CRM updates", isSlot: true },
-            { start: "14:12", end: "16:00", name: "Call Session 2 (continue toward 25 calls)", isSlot: false },
-            { start: "16:00", end: "16:12", name: "Message Slot 4: 10 cold messages + replies + CRM updates", isSlot: true },
-            { start: "16:12", end: "20:00", name: "Meetings Block (Prep, Notes & Follow-ups)", isSlot: false },
-            { start: "20:00", end: "21:48", name: "Upload 15 Blogs + Request Indexing", isSlot: false },
-            { start: "21:48", end: "22:00", name: "Message Slot 5: Final 10 cold messages + replies + CRM updates + EOD review", isSlot: true }
+            { start: "13:00", end: "14:00", name: "Lunch Break", isSlot: false },
+            { start: "14:00", end: "14:12", name: "Message Slot 3: 10 cold messages plus replies plus CRM updates", isSlot: true },
+            { start: "14:12", end: "16:00", name: "Call Session 2", isSlot: false },
+            { start: "16:00", end: "16:12", name: "Message Slot 4: 10 cold messages plus replies plus CRM updates", isSlot: true },
+            { start: "16:12", end: "20:00", name: "Meetings Block", isSlot: false },
+            { start: "20:00", end: "21:48", name: "Upload 15 Blogs plus Request Indexing", isSlot: false },
+            { start: "21:48", end: "22:00", name: "Message Slot 5: Final 10 cold messages plus replies plus CRM updates plus end-of-day review", isSlot: true }
         ];
 
-        // --- Live Timetable Evaluator Engine ---
-        function updateTaskBar(currentHour, currentMin) {
-            const currentTotalMinutes = (currentHour * 60) + currentMin;
-            let currentTask = null;
+        // --- Navigation Window Control Subsystems ---
+        function toggleSidebar(e) {
+            e.stopPropagation();
+            document.getElementById('sidebarMenu').classList.toggle('open');
+        }
 
-            for (let slot of timetable) {
-                const [sHour, sMin] = slot.start.split(":").map(Number);
-                const [eHour, eMin] = slot.end.split(":").map(Number);
-                const startTotal = (sHour * 60) + sMin;
-                const endTotal = (eHour * 60) + eMin;
-
-                if (currentTotalMinutes >= startTotal && currentTotalMinutes < endTotal) {
-                    currentTask = slot;
-                    break;
-                }
-            }
-
-            const titleEl = document.getElementById('task-title');
-            const timeEl = document.getElementById('task-time');
-            const checklistEl = document.getElementById('slot-checklist');
-            const statusEl = document.getElementById('task-status');
-
-            if (currentTask) {
-                titleEl.textContent = currentTask.name;
-                timeEl.textContent = `${format12Hour(currentTask.start)} - ${format12Hour(currentTask.end)}`;
-                statusEl.textContent = currentTask.isSlot ? "⚡ Core Message Slot (12 Mins)" : "🎯 Current Focus";
-                
-                if (currentTask.isSlot) {
-                    checklistEl.classList.remove('hidden');
-                } else {
-                    checklistEl.classList.add('hidden');
-                }
-            } else {
-                titleEl.textContent = "Off-Duty / System Idle";
-                timeEl.textContent = "Clear";
-                statusEl.textContent = "Status";
-                checklistEl.classList.add('hidden');
+        function closeSidebarOutside(e) {
+            const sidebar = document.getElementById('sidebarMenu');
+            if (sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
             }
         }
 
-        function format12Hour(timeStr) {
-            let [h, m] = timeStr.split(":").map(Number);
-            const ampm = h >= 12 ? 'PM' : 'AM';
-            h = h % 12;
-            h = h ? h : 12;
-            return `${h}:${String(m).padStart(2, '0')} ${ampm}`;
-        }
-
-        // --- UI Panel Controls ---
-        function toggleSidebar() {
-            document.getElementById('sidebarMenu').classList.toggle('closed');
-            document.body.classList.toggle('sidebar-closed-state');
+        function toggleModal(show) {
+            const modal = document.getElementById('timetableModal');
+            modal.classList.toggle('active', show);
+            if (show) {
+                renderModalSchedule();
+                document.getElementById('sidebarMenu').classList.remove('open');
+            }
         }
 
         let activeView = 'clock';
@@ -535,13 +662,127 @@
             document.getElementById('clock-interface').classList.toggle('hidden', mode !== 'clock');
             document.getElementById('stopwatch-interface').classList.toggle('hidden', mode !== 'stopwatch');
             document.getElementById('sw-controls-menu').style.display = mode === 'stopwatch' ? 'flex' : 'none';
+            
+            document.getElementById('sidebarMenu').classList.remove('open');
         }
 
-        // --- Theme Tone Settings ---
+        // --- Core Time Calculations & Calendar Headers ---
+        let lastMatchedIndex = -1;
+        let spokeHours = new Set();
+
+        function updateScheduleText(currentHour, currentMin, currentSec) {
+            const currentTotalMinutes = (currentHour * 60) + currentMin;
+            let matchedIndex = -1;
+
+            for (let i = 0; i < timetable.length; i++) {
+                const [sHour, sMin] = timetable[i].start.split(":").map(Number);
+                const [eHour, eMin] = timetable[i].end.split(":").map(Number);
+                if (currentTotalMinutes >= (sHour * 60 + sMin) && currentTotalMinutes < (eHour * 60 + eMin)) {
+                    matchedIndex = i;
+                    break;
+                }
+            }
+
+            const textEl = document.getElementById('plain-task-text');
+            if (matchedIndex !== -1) {
+                const currentTask = timetable[matchedIndex];
+                const cleanDisplayStr = currentTask.name.replace(/plus/g, "+");
+                textEl.textContent = `${format12Hour(currentTask.start)} - ${format12Hour(currentTask.end)} : ${cleanDisplayStr}`;
+
+                // --- AUDIO TRACK ANNOUNCEMENT SYNC ENGINE ---
+                const [startHour, startMin] = currentTask.start.split(":").map(Number);
+                const [endHour, endMin] = currentTask.end.split(":").map(Number);
+                const minutesElapsed = currentTotalMinutes - ((startHour * 60) + startMin);
+                const totalTaskDuration = ((endHour * 60) + endMin) - ((startHour * 60) + startMin);
+
+                if (minutesElapsed > 0 && minutesElapsed % 60 === 0 && currentSec === 0) {
+                    const hoursCompleted = minutesElapsed / 60;
+                    const totalTaskHours = Math.floor(totalTaskDuration / 60);
+                    const hoursRemaining = totalTaskHours - hoursCompleted;
+                    const trackerKey = `${matchedIndex}-${hoursCompleted}`;
+
+                    if (!spokeHours.has(trackerKey)) {
+                        spokeHours.add(trackerKey);
+                        let remainingPhrase = hoursRemaining > 0 
+                            ? `${hoursRemaining} ${hoursRemaining === 1 ? 'hour' : 'hours'} more to go. Keep going!`
+                            : "Wrap up the session. Moving to the next item shortly!";
+                        speakVoiceText(`Attention. This particular task, ${currentTask.name}, has completed ${hoursCompleted} ${hoursCompleted === 1 ? 'hour' : 'hours'}. ${remainingPhrase}`);
+                    }
+                }
+            } else {
+                textEl.textContent = "Off-Duty / System Idle";
+            }
+
+            if (matchedIndex !== lastMatchedIndex) {
+                lastMatchedIndex = matchedIndex;
+                spokeHours.clear();
+                if (document.getElementById('timetableModal').classList.contains('active')) {
+                    renderModalSchedule();
+                }
+            }
+        }
+
+        function updateCalendarHeader() {
+            const now = new Date();
+            const options = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+            document.getElementById('live-calendar-cluster').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        function speakVoiceText(textToSay) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(textToSay);
+                utterance.rate = 1.0; 
+                utterance.pitch = 1.0;
+                const voices = window.speechSynthesis.getVoices();
+                const preferredVoice = voices.find(v => v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Zira'));
+                if (preferredVoice) utterance.voice = preferredVoice;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function renderModalSchedule() {
+            const container = document.getElementById('modal-schedule-grid');
+            container.innerHTML = '';
+            timetable.forEach((slot, index) => {
+                const row = document.createElement('div');
+                row.className = `schedule-row ${index === lastMatchedIndex ? 'active-row' : ''}`;
+                
+                const timeSpan = document.createElement('div');
+                timeSpan.className = 'row-time';
+                timeSpan.textContent = `${format12Hour(slot.start)} - ${format12Hour(slot.end)}`;
+                
+                const taskSpan = document.createElement('div');
+                taskSpan.className = 'row-task';
+                taskSpan.textContent = slot.name.replace(/plus/g, "+");
+                
+                row.appendChild(timeSpan);
+                row.appendChild(taskSpan);
+                container.appendChild(row);
+            });
+        }
+
+        function format12Hour(timeStr) {
+            let [h, m] = timeStr.split(":").map(Number);
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12; h = h ? h : 12;
+            return `${h}:${String(m).padStart(2, '0')} ${ampm}`;
+        }
+
+        // --- Theme Color Parameters Matrix ---
+        function hexToRgb(hex) {
+            let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : null;
+        }
+
+        //
         function setThemeColor(darkHex, lightHex, elementClicked) {
             document.documentElement.style.setProperty('--color-dark', darkHex);
             document.documentElement.style.setProperty('--color-light', lightHex);
             document.documentElement.style.setProperty('--color-dots', lightHex + 'bf'); 
+            
+            const rgbValues = hexToRgb(lightHex);
+            if(rgbValues) document.documentElement.style.setProperty('--color-light-rgb', rgbValues);
 
             if(elementClicked) {
                 document.querySelectorAll('.color-bubble').forEach(b => b.classList.remove('active'));
@@ -559,101 +800,76 @@
             let R = parseInt(hex.substring(1,3),16);
             let G = parseInt(hex.substring(3,5),16);
             let B = parseInt(hex.substring(5,7),16);
-            R = parseInt(R * (100 + percent) / 100);
-            G = parseInt(G * (100 + percent) / 100);
-            B = parseInt(B * (100 + percent) / 100);
-            R = (R<255)?R:255; G = (G<255)?G:255; B = (B<255)?B:255;
-            R = (R>0)?R:0; G = (G>0)?G:0; B = (B>0)?B:0;
-            let rHex = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
-            let gHex = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
-            let bHex = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
-            return "#"+rHex+gHex+bHex;
+            R = parseInt(R * (100 + percent) / 100); G = parseInt(G * (100 + percent) / 100); B = parseInt(B * (100 + percent) / 100);
+            return "#"+((1<<24)+(R<255?R<0?0:R:255<<16)+(G<255?G<0?0:G:255<<8)+(B<255?B<0?0:B:255)).toString(16).slice(1);
         }
 
         function toggleTheme() {
             document.body.classList.toggle('light-mode');
         }
 
-        // --- Time Execution Engine ---
+        // --- Execution Loops ---
         function runClock() {
             const now = new Date();
             const rawHours = now.getHours();
             const rawMinutes = now.getMinutes();
+            const rawSeconds = now.getSeconds();
             
-            // Render Tasks Status Engine
-            updateTaskBar(rawHours, rawMinutes);
+            updateScheduleText(rawHours, rawMinutes, rawSeconds);
+            updateCalendarHeader();
 
             if(activeView !== 'clock') return;
             
-            let hours = rawHours % 12;
-            hours = hours ? hours : 12; 
+            let hours = rawHours % 12; hours = hours ? hours : 12; 
             
-            const hoursStr = String(hours).padStart(2, '0');
-            const minutesStr = String(rawMinutes).padStart(2, '0');
-
-            document.getElementById('h1').textContent = hoursStr[0];
-            document.getElementById('h2').textContent = hoursStr[1];
-            document.getElementById('m1').textContent = minutesStr[0];
-            document.getElementById('m2').textContent = minutesStr[1];
+            document.getElementById('h1').textContent = String(hours).padStart(2, '0')[0];
+            document.getElementById('h2').textContent = String(hours).padStart(2, '0')[1];
+            document.getElementById('m1').textContent = String(rawMinutes).padStart(2, '0')[0];
+            document.getElementById('m2').textContent = String(rawMinutes).padStart(2, '0')[1];
+            document.getElementById('s1').textContent = String(rawSeconds).padStart(2, '0')[0];
+            document.getElementById('s2').textContent = String(rawSeconds).padStart(2, '0')[1];
         }
         setInterval(runClock, 1000);
         runClock();
 
-        // --- Stopwatch System ---
-        let swInterval = null;
-        let startTime = 0;
-        let elapsedTime = 0;
-        let swRunning = false;
+        // --- Stopwatch Sub-Systems ---
+        let swInterval = null; let startTime = 0; let elapsedTime = 0; let swRunning = false;
 
         function toggleStopwatch() {
             const btn = document.getElementById('sw-toggle-btn');
             if(!swRunning) {
-                swRunning = true;
-                btn.textContent = 'Pause';
-                btn.style.backgroundColor = '#f1c40f';
+                swRunning = true; btn.textContent = 'Pause'; btn.style.backgroundColor = '#f1c40f';
                 startTime = Date.now() - elapsedTime;
                 swInterval = setInterval(updateStopwatch, 10);
             } else {
-                swRunning = false;
-                btn.textContent = 'Start';
-                btn.style.backgroundColor = '#2ecc71';
+                swRunning = false; btn.textContent = 'Start'; btn.style.backgroundColor = '#2ecc71';
                 clearInterval(swInterval);
             }
         }
 
+        //
         function resetStopwatch() {
-            swRunning = false;
-            clearInterval(swInterval);
-            elapsedTime = 0;
+            swRunning = false; clearInterval(swInterval); elapsedTime = 0;
             const btn = document.getElementById('sw-toggle-btn');
-            btn.textContent = 'Start';
-            btn.style.backgroundColor = '#2ecc71';
-            
-            document.getElementById('s-m1').textContent = '0';
-            document.getElementById('s-m2').textContent = '0';
-            document.getElementById('s-s1').textContent = '0';
-            document.getElementById('s-s2').textContent = '0';
+            btn.textContent = 'Start'; btn.style.backgroundColor = '#2ecc71';
+            document.getElementById('s-m1').textContent = '0'; document.getElementById('s-m2').textContent = '0';
+            document.getElementById('s-s1').textContent = '0'; document.getElementById('s-s2').textContent = '0';
             document.getElementById('s-ms').textContent = '00';
         }
 
         function updateStopwatch() {
             elapsedTime = Date.now() - startTime;
-            
             let totalSeconds = Math.floor(elapsedTime / 1000);
-            let mins = Math.floor(totalSeconds / 60);
-            let secs = totalSeconds % 60;
-            let ms = Math.floor((elapsedTime % 1000) / 10);
+            let mins = Math.floor(totalSeconds / 60); let secs = totalSeconds % 60; let ms = Math.floor((elapsedTime % 1000) / 10);
 
-            const minStr = String(mins).padStart(2, '0');
-            const secStr = String(secs).padStart(2, '0');
-            const msStr = String(ms).padStart(2, '0');
-
-            document.getElementById('s-m1').textContent = minStr[0];
-            document.getElementById('s-m2').textContent = minStr[1];
-            document.getElementById('s-s1').textContent = secStr[0];
-            document.getElementById('s-s2').textContent = secStr[1];
-            document.getElementById('s-ms').textContent = msStr;
+            document.getElementById('s-m1').textContent = String(mins).padStart(2, '0')[0];
+            document.getElementById('s-m2').textContent = String(mins).padStart(2, '0')[1];
+            document.getElementById('s-s1').textContent = String(secs).padStart(2, '0')[0];
+            document.getElementById('s-s2').textContent = String(secs).padStart(2, '0')[1];
+            document.getElementById('s-ms').textContent = String(ms).padStart(2, '0');
         }
+
+        setThemeColor('#1062c3', '#5faaff', null);
     </script>
 </body>
 </html>
