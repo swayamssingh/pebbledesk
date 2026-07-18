@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Desk & Mobile Clock</title>
+    <link rel="icon" type="image/png" href="icon-192.png"><link rel="apple-touch-icon" href="icon-512.png"><link rel="manifest" href="manifest.json"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Pebbledesk"><meta name="theme-color" content="#070709">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
@@ -49,7 +50,7 @@
             transition: background-color 0.3s ease;
         }
 
-        /* --- SIDEBAR PANEL (WITH SCROLL FIX) --- */
+        /* --- SIDEBAR PANEL --- */
         .sidebar {
             width: 280px;
             height: 100vh;
@@ -60,7 +61,7 @@
             padding: 70px 20px 30px 20px;
             display: flex;
             flex-direction: column;
-            gap: 25px;
+            gap: 20px;
             position: fixed;
             left: 0;
             top: 0;
@@ -69,7 +70,7 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             transform: translateX(-100%);
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow-y: auto; /* Fix scrolling issue inside options navigation panel */
+            overflow-y: auto;
             scrollbar-width: thin;
         }
 
@@ -106,7 +107,7 @@
         .setting-group {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
         .setting-label {
@@ -117,19 +118,20 @@
             opacity: 0.8;
         }
 
-        .btn-toggle, .btn-mode, .btn-action {
+        .btn-toggle, .btn-mode, .btn-action, .btn-timeformat {
             background: rgba(128, 128, 128, 0.15);
             border: 1px solid var(--panel-border);
             color: inherit;
-            padding: 12px;
+            padding: 10px;
             border-radius: 12px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             text-align: center;
+            transition: all 0.2s;
         }
 
-        .btn-mode.active {
+        .btn-mode.active, .btn-timeformat.active {
             background: var(--color-light);
             color: #000;
             border-color: transparent;
@@ -183,19 +185,20 @@
             border: 2px solid var(--panel-border);
         }
 
-        .stopwatch-controls {
+        .stopwatch-controls, .timer-inputs-panel {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
         }
 
         .btn-sw {
-            padding: 12px;
+            padding: 10px;
             border-radius: 10px;
             border: none;
             font-weight: 600;
             cursor: pointer;
             color: white;
+            font-size: 0.85rem;
         }
         .btn-start { background-color: #2ecc71; }
         .btn-reset { background-color: #e74c3c; }
@@ -261,10 +264,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            animation: immersiveDrift 9s ease-in-out infinite; /* Immersive floating animation loop */
+            animation: immersiveDrift 9s ease-in-out infinite;
         }
 
-        /* Bigger font scaling array rulesets */
         .digit-pair {
             display: flex;
             align-items: center;
@@ -312,12 +314,12 @@
             font-weight: 600;
         }
 
-        /* --- HELVETICA TASK COMPONENT (THEME COLOR LAYER MATCHING) --- */
+        /* --- HELVETICA TASK COMPONENT --- */
         .task-plain-text {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             font-weight: 700;
             font-size: clamp(1.15rem, 3.4vw, 1.75rem);
-            color: var(--color-light); /* Matching the timer theme selection accents natively */
+            color: var(--color-light);
             text-align: center;
             letter-spacing: -0.02em;
             line-height: 1.4;
@@ -355,13 +357,17 @@
 
         .modal-content {
             width: 100%;
-            max-width: 750px;
-            max-height: 85vh;
+            max-width: 800px;
+            max-height: 90vh;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 30px;
+            gap: 25px;
             padding-right: 10px;
+            padding: 25px;
+            background: rgba(128, 128, 128, 0.05);
+            border-radius: 20px;
+            border: 1px solid var(--panel-border);
         }
 
         .modal-header {
@@ -387,7 +393,7 @@
             font-weight: 600;
         }
 
-        .schedule-section h4, .targets-section h4 {
+        .schedule-section h4, .targets-section h4, .editor-section h4 {
             font-family: 'Fredoka', sans-serif;
             font-size: 1.25rem;
             color: var(--color-light);
@@ -402,8 +408,9 @@
 
         .schedule-row {
             display: flex;
+            align-items: center;
             padding: 12px 16px;
-            background: rgba(128,128,128,0.08);
+            background: rgba(128, 128, 128, 0.08);
             border-radius: 10px;
             border-left: 4px solid var(--panel-border);
             font-size: 0.95rem;
@@ -411,7 +418,7 @@
 
         .schedule-row.active-row {
             border-left-color: var(--color-light);
-            background: rgba(var(--color-light-rgb, 95, 170, 255), 0.12);
+            background: rgba(95, 170, 255, 0.12);
         }
 
         .row-time {
@@ -423,6 +430,23 @@
         .row-task {
             flex: 1;
             line-height: 1.4;
+        }
+
+        /* Trash action button */
+        .row-delete {
+            background: none;
+            border: none;
+            color: #ff5f5f;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 4px 8px;
+            margin-left: 10px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .row-delete:hover {
+            background: rgba(255, 95, 95, 0.15);
         }
 
         .targets-list {
@@ -444,7 +468,93 @@
             line-height: 1.4;
         }
 
-        /* Responsive UI Breakpoints */
+        /* --- SCHEDULE CREATOR/EDITOR FORM --- */
+        .creator-form {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            background: rgba(128,128,128,0.05);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid var(--panel-border);
+        }
+
+        @media(min-width: 600px) {
+            .creator-form {
+                grid-template-columns: 1fr 1fr 2fr auto;
+                align-items: end;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            opacity: 0.8;
+        }
+
+        .form-input {
+            background: rgba(128, 128, 128, 0.15);
+            border: 1px solid var(--panel-border);
+            color: var(--text-main);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .form-btn {
+            background: var(--color-light);
+            color: #000;
+            font-weight: 700;
+            border: none;
+            padding: 11px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        .timer-setup-inputs {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .timer-unit-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .timer-unit-box label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        .timer-setup-input {
+            width: 65px;
+            background: rgba(128, 128, 128, 0.15);
+            border: 1px solid var(--panel-border);
+            color: inherit;
+            padding: 8px;
+            text-align: center;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
         @media (max-width: 767px) {
             .display-group {
                 flex-direction: column;
@@ -485,7 +595,6 @@
     <!-- CALENDAR METADATA CLUSTER MODULE -->
     <div class="calendar-corner-tag" id="live-calendar-cluster">Loading Date...</div>
 
-    <!-- OPTIONS PANEL -->
     <div class="sidebar" id="sidebarMenu">
         <h2>Options Panel</h2>
         
@@ -493,11 +602,25 @@
             <span class="setting-label">Display Mode</span>
             <button class="btn-mode active" id="mode-clock" onclick="switchView('clock')">Clock</button>
             <button class="btn-mode" id="mode-sw" onclick="switchView('stopwatch')">Stopwatch</button>
+            <button class="btn-mode" id="mode-timer" onclick="switchView('timer')">Countdown Timer</button>
+        </div>
+
+        <div class="setting-group">
+            <span class="setting-label">Time Format</span>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <button class="btn-timeformat active" id="format-12" onclick="setFormat(12)">12H</button>
+                <button class="btn-timeformat" id="format-24" onclick="setFormat(24)">24H</button>
+            </div>
+        </div>
+
+        <div class="setting-group">
+            <span class="setting-label">Sound Notifications</span>
+            <button class="btn-toggle" id="btn-sound-toggle" onclick="toggleSoundAlerts()">Alerts: ON</button>
         </div>
 
         <div class="setting-group">
             <span class="setting-label">Timetable & Goals</span>
-            <button class="btn-action" onclick="toggleModal(true)">View Schedule Details</button>
+            <button class="btn-action" onclick="toggleModal(true)">Open Schedule Board</button>
         </div>
 
         <div class="setting-group">
@@ -524,6 +647,7 @@
             </div>
         </div>
 
+        <!-- Dynamic Control Interfaces dependent on Selected View -->
         <div class="setting-group" id="sw-controls-menu" style="display: none;">
             <span class="setting-label">Stopwatch Controls</span>
             <div class="stopwatch-controls">
@@ -531,9 +655,30 @@
                 <button class="btn-sw btn-reset" onclick="resetStopwatch()">Reset</button>
             </div>
         </div>
+
+        <div class="setting-group" id="timer-controls-menu" style="display: none;">
+            <span class="setting-label">Timer Setup</span>
+            <div class="timer-setup-inputs">
+                <div class="timer-unit-box">
+                    <input type="number" id="timer-setup-h" class="timer-setup-input" min="0" max="23" value="0">
+                    <label>Hrs</label>
+                </div>
+                <div class="timer-unit-box">
+                    <input type="number" id="timer-setup-m" class="timer-setup-input" min="0" max="59" value="15">
+                    <label>Min</label>
+                </div>
+                <div class="timer-unit-box">
+                    <input type="number" id="timer-setup-s" class="timer-setup-input" min="0" max="59" value="0">
+                    <label>Sec</label>
+                </div>
+            </div>
+            <div class="timer-inputs-panel">
+                <button class="btn-sw btn-start" id="timer-toggle-btn" onclick="toggleTimer()">Start</button>
+                <button class="btn-sw btn-reset" onclick="resetTimer()">Reset</button>
+            </div>
+        </div>
     </div>
 
-    <!-- MAIN DISPLAY ENGINE -->
     <div class="main-display" onclick="closeSidebarOutside(event)">
         <div class="view-wrapper">
             
@@ -582,13 +727,38 @@
                 </div>
             </div>
 
+            <!-- Timer Grid View -->
+            <div class="view-container hidden" id="timer-interface">
+                <div class="display-group">
+                    <div class="digit-pair">
+                        <span class="d1" id="t-h1">0</span>
+                        <span class="d2" id="t-h2">0</span>
+                    </div>
+                    <div class="colon-container">
+                        <div class="colon-dot"></div>
+                        <div class="colon-dot"></div>
+                    </div>
+                    <div class="digit-pair">
+                        <span class="d1" id="t-m1">0</span>
+                        <span class="d2" id="t-m2">0</span>
+                    </div>
+                    <div class="colon-container">
+                        <div class="colon-dot"></div>
+                        <div class="colon-dot"></div>
+                    </div>
+                    <div class="digit-pair">
+                        <span class="d1" id="t-s1">0</span>
+                        <span class="d2" id="t-s2">0</span>
+                    </div>
+                </div>
+            </div>
+
             <!-- DYNAMIC HELVETICA TRACK VIEW -->
             <div class="task-plain-text" id="plain-task-text">Loading Schedule Metrics...</div>
 
         </div>
     </div>
 
-    <!-- TIMETABLE FULLSCREEN MODAL OVERLAY -->
     <div class="modal-overlay" id="timetableModal" onclick="toggleModal(false)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <div class="modal-header">
@@ -606,6 +776,33 @@
                 </div>
             </div>
 
+            <!-- Live Editable Form Section -->
+            <div class="editor-section">
+                <h4>Add New Schedule Task</h4>
+                <form class="creator-form" onsubmit="addCustomTask(event)">
+                    <div class="form-group">
+                        <label for="form-start">Start Time</label>
+                        <input type="time" id="form-start" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-end">End Time</label>
+                        <input type="time" id="form-end" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-name">Task Description</label>
+                        <input type="text" id="form-name" class="form-input" placeholder="e.g. Call Session 3" required>
+                    </div>
+                    <div class="form-group" style="flex-direction: row; gap: 8px; align-items: center; justify-content: flex-start; margin-bottom: 2px;">
+                        <input type="checkbox" id="form-slot" style="width:18px; height:18px; cursor:pointer;">
+                        <label for="form-slot" style="margin:0; cursor:pointer;">12M slot?</label>
+                    </div>
+                    <button type="submit" class="form-btn">Add Task</button>
+                </form>
+                <div style="margin-top: 10px; display: flex; gap: 10px; justify-content: flex-end;">
+                    <button class="close-modal-btn" style="background: rgba(231, 76, 60, 0.15); color: #ff5f5f; border-color: transparent;" onclick="resetTimetableToDefault()">Reset Defaults</button>
+                </div>
+            </div>
+
             <div class="schedule-section">
                 <h4>Operational Timetable</h4>
                 <div class="schedule-grid" id="modal-schedule-grid">
@@ -616,7 +813,8 @@
     </div>
 
     <script>
-        const timetable = [
+        // Core Default Operational Timetable Array
+        const defaultTimetable = [
             { start: "09:00", end: "09:15", name: "Set agenda & prepare CRM", isSlot: false },
             { start: "09:15", end: "09:27", name: "Message Slot 1: 10 cold messages plus reply to responses plus CRM updates", isSlot: true },
             { start: "09:27", end: "11:42", name: "Call Session 1", isSlot: false },
@@ -630,6 +828,87 @@
             { start: "20:00", end: "21:48", name: "Upload 15 Blogs plus Request Indexing", isSlot: false },
             { start: "21:48", end: "22:00", name: "Message Slot 5: Final 10 cold messages plus replies plus CRM updates plus end-of-day review", isSlot: true }
         ];
+
+        // System Configurations state
+        let timetable = [];
+        let systemFormat = 12; // 12-hour or 24-hour mode
+        let alertsEnabled = true;
+
+        // Load Persistent Storage States
+        function loadStorageState() {
+            const savedTimetable = localStorage.getItem('desk_clock_timetable');
+            timetable = savedTimetable ? JSON.parse(savedTimetable) : [...defaultTimetable];
+            sortTimetable();
+
+            const savedFormat = localStorage.getItem('desk_clock_format');
+            if (savedFormat) {
+                setFormat(parseInt(savedFormat));
+            }
+
+            const savedAlerts = localStorage.getItem('desk_clock_alerts');
+            if (savedAlerts !== null) {
+                alertsEnabled = savedAlerts === 'true';
+                updateSoundAlertsBtn();
+            }
+        }
+
+        function saveTimetableState() {
+            localStorage.setItem('desk_clock_timetable', JSON.stringify(timetable));
+        }
+
+        function sortTimetable() {
+            timetable.sort((a, b) => {
+                const [aH, aM] = a.start.split(":").map(Number);
+                const [bH, bM] = b.start.split(":").map(Number);
+                return (aH * 60 + aM) - (bH * 60 + bM);
+            });
+        }
+
+        // Add custom task dynamically via UI form
+        function addCustomTask(event) {
+            event.preventDefault();
+            const startInput = document.getElementById('form-start').value;
+            const endInput = document.getElementById('form-end').value;
+            const nameInput = document.getElementById('form-name').value;
+            const slotInput = document.getElementById('form-slot').checked;
+
+            if (startInput >= endInput) {
+                // Inline UI toast alternative instead of standard blocked alerts
+                document.getElementById('plain-task-text').textContent = "⚠️ Error: Start time must be before End time.";
+                setTimeout(runClock, 4000);
+                return;
+            }
+
+            timetable.push({
+                start: startInput,
+                end: endInput,
+                name: nameInput,
+                isSlot: slotInput
+            });
+
+            sortTimetable();
+            saveTimetableState();
+            renderModalSchedule();
+
+            // Clear inputs safely
+            document.getElementById('form-name').value = '';
+            document.getElementById('form-slot').checked = false;
+        }
+
+        // Delete schedule entries
+        function deleteScheduleItem(index, event) {
+            event.stopPropagation();
+            timetable.splice(index, 1);
+            saveTimetableState();
+            renderModalSchedule();
+        }
+
+        function resetTimetableToDefault() {
+            timetable = [...defaultTimetable];
+            sortTimetable();
+            saveTimetableState();
+            renderModalSchedule();
+        }
 
         // --- Navigation Window Control Subsystems ---
         function toggleSidebar(e) {
@@ -658,12 +937,72 @@
             activeView = mode;
             document.getElementById('mode-clock').classList.toggle('active', mode === 'clock');
             document.getElementById('mode-sw').classList.toggle('active', mode === 'stopwatch');
+            document.getElementById('mode-timer').classList.toggle('active', mode === 'timer');
             
             document.getElementById('clock-interface').classList.toggle('hidden', mode !== 'clock');
             document.getElementById('stopwatch-interface').classList.toggle('hidden', mode !== 'stopwatch');
+            document.getElementById('timer-interface').classList.toggle('hidden', mode !== 'timer');
+            
             document.getElementById('sw-controls-menu').style.display = mode === 'stopwatch' ? 'flex' : 'none';
+            document.getElementById('timer-controls-menu').style.display = mode === 'timer' ? 'flex' : 'none';
             
             document.getElementById('sidebarMenu').classList.remove('open');
+        }
+
+        function setFormat(format) {
+            systemFormat = format;
+            localStorage.setItem('desk_clock_format', format);
+            document.getElementById('format-12').classList.toggle('active', format === 12);
+            document.getElementById('format-24').classList.toggle('active', format === 24);
+        }
+
+        function toggleSoundAlerts() {
+            alertsEnabled = !alertsEnabled;
+            localStorage.setItem('desk_clock_alerts', alertsEnabled);
+            updateSoundAlertsBtn();
+            // User feedback chime test
+            if (alertsEnabled) playChimeSound();
+        }
+
+        function updateSoundAlertsBtn() {
+            document.getElementById('btn-sound-toggle').textContent = alertsEnabled ? "Alerts: ON" : "Alerts: MUTED";
+        }
+
+        // Modern Premium Synthesizer chime alerts for seamless desktop user flows
+        function playChimeSound() {
+            if (!alertsEnabled) return;
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                const now = ctx.currentTime;
+                
+                // Double soft-pulse chimes structure
+                const osc1 = ctx.createOscillator();
+                const osc2 = ctx.createOscillator();
+                const gainNode = ctx.createGain();
+
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(587.33, now); // D5 Note
+                osc1.frequency.exponentialRampToValueAtTime(1174.66, now + 0.12); // Octave Slide
+
+                osc2.type = 'triangle';
+                osc2.frequency.setValueAtTime(783.99, now); // G5 Note
+
+                gainNode.gain.setValueAtTime(0.25, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+
+                osc1.connect(gainNode);
+                osc2.connect(gainNode);
+                gainNode.connect(ctx.destination);
+
+                osc1.start(now);
+                osc2.start(now);
+                osc1.stop(now + 1.2);
+                osc2.stop(now + 1.2);
+            } catch (err) {
+                console.error("Audio Synthesis error: ", err);
+            }
         }
 
         // --- Core Time Calculations & Calendar Headers ---
@@ -706,6 +1045,8 @@
                         let remainingPhrase = hoursRemaining > 0 
                             ? `${hoursRemaining} ${hoursRemaining === 1 ? 'hour' : 'hours'} more to go. Keep going!`
                             : "Wrap up the session. Moving to the next item shortly!";
+                        
+                        playChimeSound();
                         speakVoiceText(`Attention. This particular task, ${currentTask.name}, has completed ${hoursCompleted} ${hoursCompleted === 1 ? 'hour' : 'hours'}. ${remainingPhrase}`);
                     }
                 }
@@ -713,9 +1054,14 @@
                 textEl.textContent = "Off-Duty / System Idle";
             }
 
+            // Play ambient chime on task transition
             if (matchedIndex !== lastMatchedIndex) {
                 lastMatchedIndex = matchedIndex;
                 spokeHours.clear();
+                playChimeSound();
+                if (matchedIndex !== -1) {
+                    speakVoiceText(`Starting task: ${timetable[matchedIndex].name}`);
+                }
                 if (document.getElementById('timetableModal').classList.contains('active')) {
                     renderModalSchedule();
                 }
@@ -729,7 +1075,7 @@
         }
 
         function speakVoiceText(textToSay) {
-            if ('speechSynthesis' in window) {
+            if ('speechSynthesis' in window && alertsEnabled) {
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(textToSay);
                 utterance.rate = 1.0; 
@@ -755,9 +1101,16 @@
                 const taskSpan = document.createElement('div');
                 taskSpan.className = 'row-task';
                 taskSpan.textContent = slot.name.replace(/plus/g, "+");
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'row-delete';
+                deleteBtn.innerHTML = '&#10006;'; // Heavy multiplication cross
+                deleteBtn.title = "Delete schedule item";
+                deleteBtn.onclick = (e) => deleteScheduleItem(index, e);
                 
                 row.appendChild(timeSpan);
                 row.appendChild(taskSpan);
+                row.appendChild(deleteBtn);
                 container.appendChild(row);
             });
         }
@@ -775,7 +1128,6 @@
             return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : null;
         }
 
-        //
         function setThemeColor(darkHex, lightHex, elementClicked) {
             document.documentElement.style.setProperty('--color-dark', darkHex);
             document.documentElement.style.setProperty('--color-light', lightHex);
@@ -820,17 +1172,20 @@
 
             if(activeView !== 'clock') return;
             
-            let hours = rawHours % 12; hours = hours ? hours : 12; 
+            let displayHours = rawHours;
+            if (systemFormat === 12) {
+                displayHours = displayHours % 12;
+                displayHours = displayHours ? displayHours : 12; 
+            }
             
-            document.getElementById('h1').textContent = String(hours).padStart(2, '0')[0];
-            document.getElementById('h2').textContent = String(hours).padStart(2, '0')[1];
+            document.getElementById('h1').textContent = String(displayHours).padStart(2, '0')[0];
+            document.getElementById('h2').textContent = String(displayHours).padStart(2, '0')[1];
             document.getElementById('m1').textContent = String(rawMinutes).padStart(2, '0')[0];
             document.getElementById('m2').textContent = String(rawMinutes).padStart(2, '0')[1];
             document.getElementById('s1').textContent = String(rawSeconds).padStart(2, '0')[0];
             document.getElementById('s2').textContent = String(rawSeconds).padStart(2, '0')[1];
         }
         setInterval(runClock, 1000);
-        runClock();
 
         // --- Stopwatch Sub-Systems ---
         let swInterval = null; let startTime = 0; let elapsedTime = 0; let swRunning = false;
@@ -847,7 +1202,6 @@
             }
         }
 
-        //
         function resetStopwatch() {
             swRunning = false; clearInterval(swInterval); elapsedTime = 0;
             const btn = document.getElementById('sw-toggle-btn');
@@ -869,7 +1223,104 @@
             document.getElementById('s-ms').textContent = String(ms).padStart(2, '0');
         }
 
-        setThemeColor('#1062c3', '#5faaff', null);
+        // --- Countdown Timer Sub-Systems ---
+        let timerInterval = null;
+        let timerTargetMs = 0;
+        let timerRunning = false;
+        let timerSetupSeconds = 900; // default 15 mins
+
+        function toggleTimer() {
+            const btn = document.getElementById('timer-toggle-btn');
+            if(!timerRunning) {
+                // Initialize countdown parameters
+                const hoursVal = parseInt(document.getElementById('timer-setup-h').value) || 0;
+                const minsVal = parseInt(document.getElementById('timer-setup-m').value) || 0;
+                const secsVal = parseInt(document.getElementById('timer-setup-s').value) || 0;
+                
+                const totalSeconds = (hoursVal * 3600) + (minsVal * 60) + secsVal;
+                if (totalSeconds <= 0) return;
+
+                timerSetupSeconds = totalSeconds;
+                timerTargetMs = Date.now() + (timerSetupSeconds * 1000);
+                
+                timerRunning = true;
+                btn.textContent = 'Pause';
+                btn.style.backgroundColor = '#f1c40f';
+                
+                timerInterval = setInterval(updateTimerCountdown, 100);
+            } else {
+                // Pause countdown
+                timerRunning = false;
+                btn.textContent = 'Resume';
+                btn.style.backgroundColor = '#2ecc71';
+                clearInterval(timerInterval);
+                
+                // Track remaining seconds dynamically
+                const diffSecs = Math.max(0, Math.round((timerTargetMs - Date.now()) / 1000));
+                timerSetupSeconds = diffSecs;
+            }
+        }
+
+        function resetTimer() {
+            timerRunning = false;
+            clearInterval(timerInterval);
+            
+            const btn = document.getElementById('timer-toggle-btn');
+            btn.textContent = 'Start';
+            btn.style.backgroundColor = '#2ecc71';
+            
+            // Re-read default settings
+            const hoursVal = parseInt(document.getElementById('timer-setup-h').value) || 0;
+            const minsVal = parseInt(document.getElementById('timer-setup-m').value) || 0;
+            const secsVal = parseInt(document.getElementById('timer-setup-s').value) || 0;
+            timerSetupSeconds = (hoursVal * 3600) + (minsVal * 60) + secsVal;
+
+            renderTimerDigits(timerSetupSeconds);
+        }
+
+        function updateTimerCountdown() {
+            const remainingMs = timerTargetMs - Date.now();
+            if (remainingMs <= 0) {
+                timerRunning = false;
+                clearInterval(timerInterval);
+                renderTimerDigits(0);
+                
+                const btn = document.getElementById('timer-toggle-btn');
+                btn.textContent = 'Start';
+                btn.style.backgroundColor = '#2ecc71';
+
+                // Play loud synthesizer chime warning when timer complete
+                playChimeSound();
+                setTimeout(playChimeSound, 400);
+                setTimeout(playChimeSound, 800);
+                speakVoiceText("Warning: Countdown Timer completed!");
+                return;
+            }
+            
+            const diffSecs = Math.ceil(remainingMs / 1000);
+            renderTimerDigits(diffSecs);
+        }
+
+        function renderTimerDigits(totalSeconds) {
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            document.getElementById('t-h1').textContent = String(hours).padStart(2, '0')[0];
+            document.getElementById('t-h2').textContent = String(hours).padStart(2, '0')[1];
+            document.getElementById('t-m1').textContent = String(minutes).padStart(2, '0')[0];
+            document.getElementById('t-m2').textContent = String(minutes).padStart(2, '0')[1];
+            document.getElementById('t-s1').textContent = String(seconds).padStart(2, '0')[0];
+            document.getElementById('t-s2').textContent = String(seconds).padStart(2, '0')[1];
+        }
+
+        // --- System Bootstrapping Execution Initialization ---
+        window.onload = function() {
+            loadStorageState();
+            setThemeColor('#1062c3', '#5faaff', null);
+            runClock();
+            resetTimer();
+        }
     </script>
 </body>
 </html>
